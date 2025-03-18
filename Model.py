@@ -1,4 +1,5 @@
 import random
+import time
 
 class Conv():
     def __init__(self,kD,n):
@@ -69,6 +70,66 @@ class Conv():
 
         # Convolution is done
 
+    def Back(self,dLdO):# perform back propagation
+        ## initialize derivative lists
+        self.dLdI = []#dL/dI
+        self.dLdW = []#dL/dW
+        self.dLdB = []#dL/dB
+
+
+        ## calculate dL/dB:
+
+        # for the dLdO of every kernel (2D)
+        for kernel in dLdO:
+            dLdB = 0# buffer for dL/dB for a kernel
+            for row in kernel:# for the row in each plane
+                dLdB += sum(row)# add the sum of all the values in the row
+
+            self.dLdB.append(dLdB)# add value into bias derivatives
+
+
+        ## calculate dL/dW:
+
+        # for every kernel
+        for kernel in range(self.n):
+            k = []
+            # for every plane in each kernel
+            for kz in range(self.k[2]):
+                plane = []# buffer to store the kernel derivatives
+                # for each row in each kernel
+                for ky in range(self.k[1]):
+                    row = []# buffer to store the kernel derivatives
+                    # for every item in each kernel
+                    for kx in range(self.k[0]):
+                        
+                        val = 0# buffer to store kernel val derivative
+                        # for every input item the kernel val is multiplied
+                        # also every dL/dO val
+                        for y in range(self.outputD[1]):
+                            for x in range(self.outputD[0]):
+                                val += self.input[kz][y+ky][x+kx]*dLdO[kernel][y][x]
+
+                        row.append(val)
+                    plane.append(row)
+                k.append(plane)
+            self.dLdW.append(k)
+
+
+        ## calculate input derivative
+
+        # initialize a list full of zeros for the input derivatives
+        self.dLdI = [[[0 for i in range(self.im[0])] for i in range(self.im[1])] for i in range(self.im[2])]
+
+        # loop though all the output values
+        for z in range(self.outputD[2]):
+            for y in range(self.outputD[1]):
+                for x in range(self.outputD[0]):
+
+                    for kz in range(self.k[2]):
+                        for ky in range(self.k[1]):
+                            for kx in range(self.k[0]):
+                                self.dLdI[kz][y+ky][x+kx] += self.kernel[z][kz][ky][kx]*dLdO[z][y][x]
+
 # define the input image
 image = [[[1,2,3],
          [4,5,6],
@@ -77,9 +138,19 @@ image = [[[1,2,3],
          [4,5,6],
          [7,8,9]]]
 
+dLs = [[[1,1],
+        [1,1]],
+        [[1,1],
+        [1,1]]]
+
 # initialize the kernel as a 2x2x2 shape and make a forward pass
+t1 = time.time()
 conv = Conv([2,2,2],2)
 conv.Pass(image)
+conv.Back(dLs)
+
+t2 = time.time()
+print(t2-t1)
 
 # print the outputs
 print("kernel")
@@ -101,3 +172,30 @@ for plane in conv.output:
 
     for row in plane:
         print(*row)
+
+print("")
+print("dL/dI")
+
+for plane in conv.dLdI:
+    print("")
+    for row in plane:
+        print(*row)
+
+print("")
+print("dL/dW")
+
+i = 0
+for neuron in conv.dLdW:
+    print(f"Neuron {i}")
+    print("")
+    i += 1
+
+    for plane in neuron:
+        print("")
+        for row in neuron:
+            print(*row)
+
+print("")
+print("dL/dB")
+
+print(*conv.dLdB)
