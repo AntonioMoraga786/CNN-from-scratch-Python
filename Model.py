@@ -7,35 +7,20 @@ class Conv():
         # kD is a variablel with the dimensions of the kernel [x,y,z]
         self.n = n# number of neurons
         
-        self.bias = []
-        ## initialize the bias between -1 and 1 for all neurons
-        for i in range(self.n):
-            self.bias.append(2*random.random()-1)
+        self.bias = [2*random.random()-1 for i in range(n)]
 
         ## initialize the weights
         self.k = kD# save the kernel dimensions
-        self.kernel = []# initialize the kernel weights list
+        self.kernel = [[[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])] for i in range(self.n)]# initialize the kernel weights list
 
         # loop though every neuron
         for neuron in range(self.n):
-            k = []# buffer for the whole kernel of a neuron
             # loop though all of the kernel values to initialize them
             for z in range(self.k[2]):
-                plane = []# buffer for the weights of the kernel
-
                 for y in range(self.k[1]):
-                    row = []# buffer for the weights of the kernel
-
                     for x in range(self.k[0]):
                         # generate a random weight -1 to 1
-                        w = 2*random.random()-1
-                        row.append(w)
-
-                    plane.append(row)
-                k.append(plane)
-            self.kernel.append(k)
-            
-        ## weight initalization is done.
+                        self.kernel[neuron][z][y][x] = 2*random.random()-1
 
     def Pass(self,image):
         # perform a forward pass
@@ -46,29 +31,23 @@ class Conv():
         self.outputD = [1+self.im[0]-self.k[0],1+self.im[1]-self.k[1],self.n]
 
         # initialize output list
-        self.output = []
+        self.output = [[[0 for i in range(self.outputD[0])] for i in range(self.outputD[1])] for i in range(self.outputD[2])]
 
         # loop though all the output values
-        for n in range(self.n):
-            plane = []# buffer for output vals
-
+        for z in range(self.n):# for every neuron
             for y in range(self.outputD[1]):
-                row = []# buffer for output vals
-
                 for x in range(self.outputD[0]):
-                    o = self.bias[n]
+                    o = self.bias[z]
 
                     # loop though allthe values in convolution of this value
                     for kz in range(self.k[2]):
                         for ky in range(self.k[1]):
                             for kx in range(self.k[0]):
-                                o += self.input[kz][y+ky][x+kx]*self.kernel[n][kz][ky][kx]
+                                o += self.input[kz][y+ky][x+kx]*self.kernel[z][kz][ky][kx]
 
-                    row.append(o)
-                plane.append(row)
-            self.output.append(plane)
+                    self.output[z][y][x] = o
 
-        # Convolution is done
+        # convolution is done
 
     def Back(self,dLdO):# perform back propagation
         ## initialize derivative lists
@@ -105,6 +84,9 @@ image = [[[1,2,3],
          [7,8,9]],
          [[1,2,3],
          [4,5,6],
+         [7,8,9]],
+         [[1,2,3],
+         [4,5,6],
          [7,8,9]]]
 
 dLs = [[[1,1],
@@ -114,7 +96,7 @@ dLs = [[[1,1],
 
 # initialize the kernel as a 2x2x2 shape and make a forward pass
 t1 = time.time()
-conv = Conv([2,2,2],2)
+conv = Conv([3,3,3],2)
 conv.Pass(image)
 conv.Back(dLs)
 
