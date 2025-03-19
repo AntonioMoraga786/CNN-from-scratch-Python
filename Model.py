@@ -156,4 +156,4 @@ for neuron in conv.dLdW:
 print("")
 print("dL/dB")
 
-print(*conv.dLdB)"""
+print(*conv.dLdB)
