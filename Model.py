@@ -11,16 +11,26 @@ class Conv():
 
         ## initialize the weights
         self.k = kD# save the kernel dimensions
-        self.kernel = [[[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])] for i in range(self.n)]# initialize the kernel weights list
+        self.kernel = []# initialize the kernel weights list
 
         # loop though every neuron
         for neuron in range(self.n):
+            k = []# buffer for the whole kernel of a neuron
             # loop though all of the kernel values to initialize them
             for z in range(self.k[2]):
+                plane = []# buffer for the weights of the kernel
+
                 for y in range(self.k[1]):
+                    row = []# buffer for the weights of the kernel
+
                     for x in range(self.k[0]):
                         # generate a random weight -1 to 1
-                        self.kernel[neuron][z][y][x] = 2*random.random()-1
+                        w = 2*random.random()-1
+                        row.append(w)
+
+                    plane.append(row)
+                k.append(plane)
+            self.kernel.append(k)
 
     def Pass(self,image):
         # perform a forward pass
@@ -100,9 +110,6 @@ conv = Conv([3,3,3],2)
 conv.Pass(image)
 conv.Back(dLs)
 
-t2 = time.time()
-print(t2-t1)
-
 # print the outputs
 print("kernel")
 for neuron in conv.kernel:
@@ -149,4 +156,4 @@ for neuron in conv.dLdW:
 print("")
 print("dL/dB")
 
-print(*conv.dLdB)
+print(*conv.dLdB)"""
