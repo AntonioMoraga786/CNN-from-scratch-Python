@@ -71,31 +71,26 @@ class Conv():
         # Convolution is done
 
     def Back(self,dLdO):# perform back propagation
-        t1 = time.time()
         ## initialize derivative lists
-        self.dLdI = []#dL/dI
-        self.dLdW = []#dL/dW
         self.dLdB = []#dL/dB
 
-        t2 = time.time()
         ## calculate dL/dB:
 
         # for the dLdO of every kernel (2D)
-        for kernel in dLdO:
+        for kernel in dLdO:# for every neuron
             dLdB = 0# buffer for dL/dB for a kernel
             for row in kernel:# for the row in each plane
                 dLdB += sum(row)# add the sum of all the values in the row
 
             self.dLdB.append(dLdB)# add value into bias derivatives
 
-        t4 = time.time()
         ## v2
         self.dLdI = [[[0 for i in range(self.im[0])] for i in range(self.im[1])] for i in range(self.im[2])]
         self.dLdW = [[[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])] for i in range(self.n)]
         
         # loop though all the output values
         for z in range(self.outputD[2]):# for every neuron
-            for y in range(self.outputD[1]):
+            for y in range(self.outputD[1]):# for every row in each output
                 for x in range(self.outputD[0]):
 
                     for kz in range(self.k[2]):
@@ -103,13 +98,6 @@ class Conv():
                             for kx in range(self.k[0]):
                                 self.dLdI[kz][y+ky][x+kx] += self.kernel[z][kz][ky][kx]*dLdO[z][y][x]
                                 self.dLdW[z][kz][ky][kx] += self.input[kz][y+ky][x+kx]*dLdO[z][y][x]
-
-        t5 = time.time()
-        print("OLD:",t4-t3)
-        print("NEW:",t5-t4)
-        print("Full OLD:",t4-t1)
-        print("Full NEW:",t5-t1+t3-t4)
-
 
 # define the input image
 image = [[[1,2,3],
