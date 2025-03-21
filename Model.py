@@ -2,10 +2,12 @@ import random
 import time
 
 class Conv():
-    def __init__(self,kD,n):
+    def __init__(self,kD,n,I):
         # function to intialize all the paramers of the layers
         # kD is a variablel with the dimensions of the kernel [x,y,z]
         self.n = n# number of neurons
+        self.im = I# input image dimensions [x,y,z]
+        self.outputD = [1+self.im[0]-self.k[0],1+self.im[1]-self.k[1],self.n]
         
         self.bias = [2*random.random()-1 for i in range(n)]
 
@@ -35,10 +37,6 @@ class Conv():
     def Pass(self,image):
         # perform a forward pass
         self.input = image# store the input matrix as well
-
-        # calculate all of the dimensions
-        self.im = [len(image[0][0]),len(image[0]),len(image)]
-        self.outputD = [1+self.im[0]-self.k[0],1+self.im[1]-self.k[1],self.n]
 
         # initialize output list
         self.output = [[[0 for i in range(self.outputD[0])] for i in range(self.outputD[1])] for i in range(self.outputD[2])]
@@ -88,72 +86,32 @@ class Conv():
                                 self.dLdI[kz][y+ky][x+kx] += self.kernel[z][kz][ky][kx]*dLdO[z][y][x]
                                 self.dLdW[z][kz][ky][kx] += self.input[kz][y+ky][x+kx]*dLdO[z][y][x]
 
-# define the input image
-image = [[[1,2,3],
-         [4,5,6],
-         [7,8,9]],
-         [[1,2,3],
-         [4,5,6],
-         [7,8,9]],
-         [[1,2,3],
-         [4,5,6],
-         [7,8,9]]]
+class dense():
+    def __init__(self,n,I):
+        self.inputD = I# input dimension (a singular integer value)
+        self.bias = [2*random.random()-1 for i in range(n)]
 
-dLs = [[[1,1],
-        [1,1]],
-        [[1,1],
-        [1,1]]]
+        self.kernel = []
+        # loop though every neuron and generate its kernel values
+        for neuron in range(n):
+            weights = [2*random.random()-1 for i in range(I)]
 
-# initialize the kernel as a 2x2x2 shape and make a forward pass
-t1 = time.time()
-conv = Conv([3,3,3],2)
-conv.Pass(image)
-conv.Back(dLs)
+            self.kernel.append(weights)
 
-# print the outputs
-print("kernel")
-for neuron in conv.kernel:
-    print("")
-    print("")
+    def Pass(self,Input):
+        # initialize variables
+        self.input = Input
+        self.output = []
 
-    for plane in neuron:
-        print("")
+        # loop though every neuron and calculate the output
+        for n in range(self.n):
+            output = self.bias[n]# add the bias value first
 
-        for row in plane:
-            print(*row)
+            # loop though every pair of weight and input vals
+            for w,i in zip(self.kernel[n],self.input):
+                output += w*i
 
-print("")
-print("output")
+            self.output.append(output)# append the calculated value into the list of outputs
 
-for plane in conv.output:
-    print("")
+        
 
-    for row in plane:
-        print(*row)
-
-print("")
-print("dL/dI")
-
-for plane in conv.dLdI:
-    print("")
-    for row in plane:
-        print(*row)
-
-print("")
-print("dL/dW")
-
-i = 0
-for neuron in conv.dLdW:
-    print(f"Neuron {i}")
-    print("")
-    i += 1
-
-    for plane in neuron:
-        print("")
-        for row in neuron:
-            print(*row)
-
-print("")
-print("dL/dB")
-
-print(*conv.dLdB)
