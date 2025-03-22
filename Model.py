@@ -90,6 +90,7 @@ class dense():
     def __init__(self,n,I):
         self.inputD = I# input dimension (a singular integer value)
         self.bias = [2*random.random()-1 for i in range(n)]
+        self.outputD = n
 
         self.kernel = []
         # loop though every neuron and generate its kernel values
@@ -104,7 +105,7 @@ class dense():
         self.output = []
 
         # loop though every neuron and calculate the output
-        for n in range(self.n):
+        for n in range(self.outputD):
             output = self.bias[n]# add the bias value first
 
             # loop though every pair of weight and input vals

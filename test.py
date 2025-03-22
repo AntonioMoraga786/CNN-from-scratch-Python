@@ -1,3 +1,4 @@
+"""
 ## test the convolutional layer
 
 from Model import Conv
@@ -72,5 +73,32 @@ print("dL/dB")
 
 print(*conv.dLdB)
 
-
+"""
 ## test the dense layer
+
+from Model import dense
+
+input = [1,2,3,4,5]
+
+layer = dense(2,5)
+layer.Pass(input)
+
+print("")
+print("bias")
+print(*layer.bias)
+
+print("")
+print("")
+print("kernel")
+i = -1
+
+for neuron in layer.kernel:
+    i += 1
+    print("")
+    print(f"neuron {i}")
+
+    print(*neuron)
+
+print("")
+print("output")
+print(*layer.output)
