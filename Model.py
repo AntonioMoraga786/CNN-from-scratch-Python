@@ -140,3 +140,51 @@ class dense():
                 dldw.append(self.input[i]*dLdO[n])
 
             self.dLdW.append(dldw)
+
+class ReLU():
+    def __init__(self,inputD):
+        self.outputD = inputD# calculate the output dimensions
+
+    def Pass(self,input):
+        self.input = input# store the input values
+
+        self.output = []# initialize output list
+
+        # loop though every item in the input and calculate output
+        for item in self.input:
+            self.output.append(self.recursion(item))
+
+    def recursion(self,inv):
+        if type(inv) != list:# we are not dealing with a list anymore
+            return max(0,inv)
+        
+        # we are dealing with a list, continue recursion
+        else:
+            out = []
+            for item in inv:
+                out.append(self.recursion(item))
+
+            return out
+
+    def Back(self,dLdO):
+        self.dLdI = []# initialize dL/dI
+
+        # loop though every item in the output and calculate derivative
+        for item,d in zip(self.output,dLdO):
+            self.dLdI.append(self.Brecursion(item,d))
+
+    def Brecursion(self,outv,der):
+        if type(outv) != list:# we are not dealing with a list anymore
+            if outv >0:
+                return der
+            
+            else:
+                return 0
+        
+        # we are dealing with a list, continue recursion
+        else:
+            out = []
+            for item,d in zip(outv,der):
+                out.append(self.Brecursion(item,d))
+
+            return out

@@ -1,6 +1,6 @@
-"""
-## test the convolutional layer
 
+## test the convolutional layer
+"""
 from Model import Conv
 import time
 # define the input image
@@ -75,7 +75,7 @@ print(*conv.dLdB)
 
 """
 ## test the dense layer
-
+""""
 from Model import dense
 
 input = [1,2,3,4,5]
@@ -129,3 +129,22 @@ for neuron in layer.dLdW:
     print("")
 
     print(*neuron)
+"""
+##Test the ReLU Activation
+
+from Model import ReLU
+
+In = [-1,-3,-5,-7,-9,2,4,6,8,0]
+dLs = [1,1,1,1,1,1,1,1,1,1]
+
+layer = ReLU(10)
+layer.Pass(In)
+layer.Back(dLs)
+
+print("")
+print("output")
+print(*layer.output)
+
+print("")
+print("dL/dI")
+print(*layer.dLdI)
