@@ -79,9 +79,11 @@ print(*conv.dLdB)
 from Model import dense
 
 input = [1,2,3,4,5]
+dLs = [1,1]
 
 layer = dense(2,5)
 layer.Pass(input)
+layer.Back(dLs)
 
 print("")
 print("bias")
@@ -102,3 +104,28 @@ for neuron in layer.kernel:
 print("")
 print("output")
 print(*layer.output)
+
+print("")
+print("")
+print("dL/dO")
+
+print(*layer.dLdB)
+
+
+print("")
+print("")
+print("dL/dI")
+
+print(*layer.dLdI)
+
+print("")
+print("")
+print("dL/dW")
+
+i = -1
+for neuron in layer.dLdW:
+    i += 1
+    print(f"neuron {i}")
+    print("")
+
+    print(*neuron)
