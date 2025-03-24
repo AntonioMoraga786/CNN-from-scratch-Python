@@ -1,8 +1,8 @@
-
+import time
 ## test the convolutional layer
 """
 from Model import Conv
-import time
+
 # define the input image
 image = [[[1,2,3],
          [4,5,6],
@@ -134,17 +134,35 @@ for neuron in layer.dLdW:
 
 from Model import ReLU
 
-In = [-1,-3,-5,-7,-9,2,4,6,8,0]
-dLs = [1,1,1,1,1,1,1,1,1,1]
+In = [[[-1,-3,-5,-7,-9,2,4,6,8,0],
+      [-1,-3,-5,-7,-9,2,4,6,8,0]],
+      [[-1,-3,-5,-7,-9,2,4,6,8,0],
+      [-1,-3,-5,-7,-9,2,4,6,8,0]]]
 
-layer = ReLU(10)
+dLs = [[[1,1,1,1,1,1,1,1,1,1],
+       [1,1,1,1,1,1,1,1,1,1]],
+       [[1,1,1,1,1,1,1,1,1,1],
+       [1,1,1,1,1,1,1,1,1,1]]]
+
+t1 = time.time()
+layer = ReLU([10,2,2])
+t2 = time.time()
 layer.Pass(In)
+t3 = time.time()
 layer.Back(dLs)
 
+t4 = time.time()
+
+print("INIT",t2-t1)
+print("PASS",t3-t2)
+print("BACK",t4-t3)
+
 print("")
-print("output")
-print(*layer.output)
+print("OUTPUT")
+for row in layer.output:
+    print(*row)
 
 print("")
 print("dL/dI")
-print(*layer.dLdI)
+for row in layer.dLdI:
+    print(*row)

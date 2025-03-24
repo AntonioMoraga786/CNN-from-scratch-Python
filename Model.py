@@ -147,44 +147,44 @@ class ReLU():
 
     def Pass(self,input):
         self.input = input# store the input values
-
-        self.output = []# initialize output list
+        self.output = []
 
         # loop though every item in the input and calculate output
-        for item in self.input:
-            self.output.append(self.recursion(item))
+        if type(self.input[0]) == list:
+            for item in self.input:
+                self.output.append(self.recursion(item))
+
+        else:
+            self.output = self.recursion(self.input)
 
     def recursion(self,inv):
-        if type(inv) != list:# we are not dealing with a list anymore
-            return max(0,inv)
+        # check if we are dealing with a miltidimensional list
+        if type(inv[0]) != list:
+            return [max(0,item) for item in inv]
         
         # we are dealing with a list, continue recursion
         else:
-            out = []
-            for item in inv:
-                out.append(self.recursion(item))
+            out = [self.recursion(item) for item in inv]
 
             return out
-
+        
     def Back(self,dLdO):
         self.dLdI = []# initialize dL/dI
 
         # loop though every item in the output and calculate derivative
-        for item,d in zip(self.output,dLdO):
-            self.dLdI.append(self.Brecursion(item,d))
+        if type(self.output[0]) == list:
+            for item,d in zip(self.output,dLdO):
+                self.dLdI.append(self.Brecursion(item,d))
+
+        else:
+            self.dLdI = self.Brecursion(self.output,dLdO)
 
     def Brecursion(self,outv,der):
-        if type(outv) != list:# we are not dealing with a list anymore
-            if outv >0:
-                return der
-            
-            else:
-                return 0
+        if type(outv[0]) != list:# we are not dealing with a list anymore
+            return [d if v >0 else 0 for v,d in zip(outv,der)]
         
         # we are dealing with a list, continue recursion
         else:
-            out = []
-            for item,d in zip(outv,der):
-                out.append(self.Brecursion(item,d))
-
+            out = [self.Brecursion(item,d) for item,d in zip(outv,der)]
             return out
+    
