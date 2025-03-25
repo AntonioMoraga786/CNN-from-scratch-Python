@@ -1,5 +1,6 @@
 import random
 import time
+from math import log
 
 class Conv():
     def __init__(self,kD,n,I):
@@ -220,3 +221,22 @@ class Softmax():
                 if i != j:
                     ## dOj/dIi x dL/dOj = dL/dIi
                     self.dLdI[i] -= (self.output[i]*self.output[j])*dLdO[j]
+
+class CategoricalCrossentropy():
+    def __init__(self,inputD):
+        self.inputD = inputD
+        self.loss = 0
+
+    def Pass(self,input,y):
+        self.input = input
+        self.dLdI = []
+        self.y = y# store the categories as well
+
+        for I in range(self.inputD):
+            self.loss -= log(self.input[I])*y[I]
+            self.dLdI.append(0)
+
+            if y[I] == 1:
+                self.dLdI[I] = -1/self.input[I]
+        
+

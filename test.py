@@ -168,7 +168,7 @@ for row in layer.dLdI:
     print(*row)
 """
 ## Test the Softmax activation function
-
+"""
 from Model import Softmax
 
 input = [1,2,3,4,5]
@@ -185,3 +185,19 @@ print(*layer.output)
 print("")
 print("dL/dI")
 print(*layer.dLdI)
+"""
+## Test The loss function
+
+from Model import CategoricalCrossentropy
+
+input = [0.1,.1,.2,.6]
+y = [0,0,0,1]# one hot encoded category
+
+loss = CategoricalCrossentropy(4)
+loss.Pass(input,y)
+
+print("loss")
+print(loss.loss)
+
+print("dL/dI")
+print(*loss.dLdI)
