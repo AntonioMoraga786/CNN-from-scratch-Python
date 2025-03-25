@@ -188,3 +188,39 @@ class ReLU():
             out = [self.Brecursion(item,d) for item,d in zip(outv,der)]
             return out
     
+class Softmax():
+    def __init__(self,inputD):
+        self.inputD = inputD
+        self.outputD = inputD
+
+    def Pass(self,Input):
+        self.input = Input
+
+        ##perform a forward Pass
+        e = 2.718281828459045235# eulers number
+
+        # get the total sum
+        self.sum = 0
+
+        for I in self.input:
+            self.sum += e**I
+
+        # calculate the output for each neuron
+        self.output = []
+
+        for I in self.input:
+            self.output.append((e**I)/self.sum)# calculate the output value
+
+    def Back(self,dLdO):
+        self.dLdI = [0 for i in range(self.inputD)]# store the derivatives
+
+        ## loop though every output to calculate derivative
+        for i in range(self.inputD):# for every input value
+            for j in range(self.inputD):# for every output value
+                if i != j:# dOj/dIi
+                    dOdI = -self.output[i]*self.output[j]
+                    self.dLdI[i] += dOdI*dLdO[j]# dOj/dIi x dL/dOj
+
+                else:# dOj/dIj
+                    dOdI = self.output[i]*(1-self.output[i])
+                    self.dLdI[i] += dOdI*dLdO[i]

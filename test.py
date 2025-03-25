@@ -131,7 +131,7 @@ for neuron in layer.dLdW:
     print(*neuron)
 """
 ##Test the ReLU Activation
-
+"""
 from Model import ReLU
 
 In = [[[-1,-3,-5,-7,-9,2,4,6,8,0],
@@ -166,3 +166,22 @@ print("")
 print("dL/dI")
 for row in layer.dLdI:
     print(*row)
+"""
+## Test the Softmax activation function
+
+from Model import Softmax
+
+input = [1,2,3,4,5]
+
+dLs = [0,0,0,0,1]
+
+layer = Softmax(5)
+layer.Pass(input)
+layer.Back(dLs)
+
+print("output")
+print(*layer.output)
+
+print("")
+print("dL/dI")
+print(*layer.dLdI)
