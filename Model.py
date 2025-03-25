@@ -238,5 +238,3 @@ class CategoricalCrossentropy():
 
             if y[I] == 1:
                 self.dLdI[I] = -1/self.input[I]
-        
-
