@@ -212,12 +212,8 @@ class Softmax():
             self.output.append((e**I)/self.sum)# calculate the output value
                     
     def Back(self,dLdO):
-        self.dLdI = []
-
-        ## calculate dLdI for i = j
-        for i in range(self.outputD):
-            self.dLdI.append(dLdO[i]*self.output[i]*(1-self.output[i]))
-
+        self.dLdI = [dLdO[i]*self.output[i]*(1-self.output[i]) for i in range(self.outputD)]
+        
         ## calculte dLdI for i != j
         for i in range(self.outputD):# for every xi
             for j in range(self.outputD):# for every output
