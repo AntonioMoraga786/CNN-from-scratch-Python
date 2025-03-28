@@ -1,6 +1,7 @@
-import random
-import time
-from math import log
+import random# to initialize weights and bias
+import time# to time the different functions in the layers
+from math import log# for SoftMax activation layer
+import json# for loading and saving the model
 
 class Conv():
     def __init__(self,kD,n,I):
@@ -238,3 +239,29 @@ class CategoricalCrossentropy():
 
             if y[I] == 1:
                 self.dLdI[I] = -1/self.input[I]
+
+class Model():
+    def __init__(self):
+        self.lr = 1# initialize learning rate
+        self.optimizer = False# set optimiser as not yet defined
+        self.loss = False # set loss function as not yet defined
+        self.epoch = 100# initialize the number of epochs
+        self.minibatch = 1# set the batch size
+        self.model = []# initialize the model list
+        self.inputD = False# initialize variable for input dimensions
+
+    def Add(self,layer):
+        self.model.append(layer)
+
+    def Train(self,data,)
+
+    def save(self,name):
+        # save the model into a json file
+
+        # save the layers
+        for i in range(len(self.model)):
+            output = {}
+            output["iD"] = "Layer"# store the layer number
+            output["InputD"] = self.model[i].inputD
+            
+        
