@@ -254,6 +254,34 @@ class Model():
     def Add(self,layer):
         self.model.append(layer)
 
+    def Pass(self,Input,Class,derivatives):
+        ## function to perform a full Pass (forward and back) over the model with a specific input data
+        ## model is already initialized
+        ## function should add derivatives from this input into derivatives list
+        ## derivatives list is a shared list between processes
+
+        # start forward Pass
+        self.input = Input# store the input value
+        self.model[0].Pass(self.input)# forward pass on input layer
+
+        ## forward pass on every other layer
+        for i in range(len(self.model)-1):
+            self.model[i+1].Pass(self.model[i].output)# pass the output from last function as input
+
+        ## perform a Pass on the loss function
+        self.loss.Pass(self.model[-1].output)
+
+        ## perform the backward Passes
+        dLdO = self.loss.dLdI# get initial derivative
+        n = len(self.model)# number of layers in the model
+
+        for i in range(n):
+            # send, for backpropagation, dLdO, shared list, minibatch size, and layer in list
+            self.model[n-i-1].Back(dLdO,derivatives,self.minibatch,n-i-1)# perform a backward Pass for every layer in the model
+            dLdO = self.model[n-i-1].dLdI# get the dL/dI of the layer
+
+        ## all the derivatives have been added into the shared list
+
     def Train(self,data,categories):
         ## initialize the model layers
         self.model[-1].init(self.inputD)# init initial layer
@@ -261,4 +289,18 @@ class Model():
         # initialize the other layers
         for l in range(len(self.model)-1):
             self.model[l+1].init(self.model[l].outputD)# initialize each layer with the output from last
-            
+
+        ## start training the model
+        for epoch in range(self.epoch):# loop for the desired number of epochs
+            pass
+            # split data into batches
+
+            # for every minibatch in data
+
+            # create shared list to store the deriatives
+
+            # create a new process for each input in minibatch
+
+            # pass the value into the optimizer
+
+            # update model
