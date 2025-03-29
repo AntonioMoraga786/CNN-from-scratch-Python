@@ -1,6 +1,7 @@
 import random
 import time
 from math import log
+import json
 
 class Conv():
     def __init__(self,kD,n,I):
@@ -238,3 +239,26 @@ class CategoricalCrossentropy():
 
             if y[I] == 1:
                 self.dLdI[I] = -1/self.input[I]
+
+class Model():
+    def __init__(self):
+        # set default parameters
+        self.lr = 1# set default learning Rate
+        self.optimizer = False# store the optimizer object here
+        self.loss = False# store the loss object here
+        self.model = []# store the layer objects here
+        self.minibatch = 1# mini-batch size (number of processes as well)
+        self.inputD = False# store the input dimensions for the model
+        self.epoch = 100# default epoch number
+
+    def Add(self,layer):
+        self.model.append(layer)
+
+    def Train(self,data,categories):
+        ## initialize the model layers
+        self.model[-1].init(self.inputD)# init initial layer
+        
+        # initialize the other layers
+        for l in range(len(self.model)-1):
+            self.model[l+1].init(self.model[l].outputD)# initialize each layer with the output from last
+            
