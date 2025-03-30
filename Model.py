@@ -322,3 +322,15 @@ class Model():
                 self.optimizer.model = self.model# update the optimizer model and prepare for updating
                 self.optimizer.Pass(shared)# pass the derivatives to the optimizer
                 self.model = self.optimizer.model# update the global model
+
+    def predict(self,In):
+        self.model[0].Pass(In)# feed input values to the input layeer
+
+        for i in range(len(self.model)-1):# loop through all the other layers in the model
+            self.model[i+1].Pass(self.model[0].output)# feed output from last layer as inptu
+
+        ## get the index of the maximum value of output
+        prob = max(self.model[-1].output)# get the maximum output value
+        pos = self.model[-1].output.index(prob)# get the index of the max value
+
+        return pos# return the index (categorical value)
