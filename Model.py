@@ -2,6 +2,7 @@ import random
 import time
 from math import log
 import json
+from multiprocessing import Manager,Pool
 
 class Conv():
     def __init__(self,kD,n,I):
@@ -292,15 +293,32 @@ class Model():
 
         ## start training the model
         for epoch in range(self.epoch):# loop for the desired number of epochs
-            pass
-            # split data into batches
+            self.batches = len(data)//self.minibatch# get the number of minibatches in the whole dataset
 
-            # for every minibatch in data
+            for n in range(self.batches):
+                # get the data for this batch
+                self.batch = data[:self.minibatch]
+                data = data[self.minibatch:]
 
-            # create shared list to store the deriatives
+                self.Cat = categories[:self.minibatch]
+                categories = categories[self.minibatch:]
 
-            # create a new process for each input in minibatch
+                # create shared list to store the deriatives
+                # empty list with two sub lists, one for bias derivatives, other for weight
+                shared = [[],[]]
+                
+                # loop through every layer
+                for model in self.model:
+                    shared[0].append(model.biasDer())# add empty bias derivative for layer
+                    shared[1].append(model.WeightDer())# add empty weights derivative for layer
 
-            # pass the value into the optimizer
+                shared = Manager().list(shared)# turn list into a shared list for pool
 
-            # update model
+                # create a new process for each input in minibatch
+                with Pool(processes=self.minibatch) as pool:# create self.minibatch processes
+                    pool.starmap(self.Pass,[(In,Cat,shared) for In,Cat in zip(self.batch,self.Cat)])
+
+                # pass the value into the optimizer and update model
+                self.optimizer.model = self.model# update the optimizer model and prepare for updating
+                self.optimizer.Pass(shared)# pass the derivatives to the optimizer
+                self.model = self.optimizer.model# update the global model
