@@ -334,3 +334,35 @@ class Model():
         pos = self.model[-1].output.index(prob)# get the index of the max value
 
         return pos# return the index (categorical value)
+    
+    def save(self,name):
+        ## function to save the model into a json format
+        with open(f"{name}.json","w") as file:
+            ## save model data
+            data = {
+                "type": "model",
+                "optimizer": self.optimizer.type,
+                "loss": self.loss.type,
+                "inputD": self.inputD,
+                "lr": self.lr,
+                "minbatch": self.minibatch,
+                "epoch": self.epoch,
+            }
+            file.write(json.dump(data,indent=4 ))
+
+            ## save the layer data
+            for layer in self.model:
+                # store the important layer data
+                data = {
+                    "type": "layer",# its layer, optimizer, or loss...
+                    "id": layer.type,# layer type (conv,dense,relu ...)
+                    "kernel": layer.kernel,# kernel values
+                    "bias": layer.bias,# bias values
+                    "inputD": layer.inputD,#layer input dimension
+                    "outputD": layer.outputD,#layer output dimension
+                    "neuron": self.n,# number of neurons
+                    "kD": self.kD# kernel dimensions (only valid for conv layers)
+                }
+
+                # save the data as json in output file
+                file.write(json.dump(data,indet=4))
