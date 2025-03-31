@@ -91,9 +91,12 @@ class Conv():
 
 class dense():
     def __init__(self,n,I):
+        self.type = 0
+        self.kD = False
         self.inputD = I# input dimension (a singular integer value)
         self.bias = [2*random.random()-1 for i in range(n)]
         self.outputD = n
+        self.n = n
 
         self.kernel = []
         # loop though every neuron and generate its kernel values
@@ -228,6 +231,7 @@ class CategoricalCrossentropy():
     def __init__(self,inputD):
         self.inputD = inputD
         self.loss = 0
+        self.type = 0
 
     def Pass(self,input,y):
         self.input = input
@@ -337,7 +341,7 @@ class Model():
     
     def save(self,name):
         ## function to save the model into a json format
-        with open(f"{name}.json","w") as file:
+        with open(f"./{name}.json","w") as file:
             ## save model data
             data = {
                 "type": "model",
@@ -348,7 +352,7 @@ class Model():
                 "minbatch": self.minibatch,
                 "epoch": self.epoch,
             }
-            file.write(json.dump(data,indent=4 ))
+            json.dump(data,file)
 
             ## save the layer data
             for layer in self.model:
@@ -360,9 +364,9 @@ class Model():
                     "bias": layer.bias,# bias values
                     "inputD": layer.inputD,#layer input dimension
                     "outputD": layer.outputD,#layer output dimension
-                    "neuron": self.n,# number of neurons
-                    "kD": self.kD# kernel dimensions (only valid for conv layers)
+                    "neuron": layer.n,# number of neurons
+                    "kD": layer.kD# kernel dimensions (only valid for conv layers)
                 }
 
                 # save the data as json in output file
-                file.write(json.dump(data,indet=4))
+                json.dump(data,file)

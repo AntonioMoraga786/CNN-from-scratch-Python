@@ -187,7 +187,7 @@ print("dL/dI")
 print(*layer.dLdI)
 """
 ## Test The loss function
-
+"""
 from Model import CategoricalCrossentropy
 
 input = [0.1,.1,.2,.6]
@@ -201,3 +201,18 @@ print(loss.loss)
 
 print("dL/dI")
 print(*loss.dLdI)
+"""
+
+## test Model class
+
+from Model import Model,dense,CategoricalCrossentropy
+
+model = Model()
+model.Add(dense(10,10))
+model.Add(dense(10,10))
+model.Add(dense(10,10))
+
+model.loss = CategoricalCrossentropy(10)
+model.optimizer = CategoricalCrossentropy(10)
+
+model.save("file")
