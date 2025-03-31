@@ -342,6 +342,7 @@ class Model():
     def save(self,name):
         ## function to save the model into a json format
         with open(f"./{name}.json","w") as file:
+            output = []
             ## save model data
             data = {
                 "type": "model",
@@ -352,7 +353,7 @@ class Model():
                 "minbatch": self.minibatch,
                 "epoch": self.epoch,
             }
-            json.dump(data,file)
+            output.append(data)
 
             ## save the layer data
             for layer in self.model:
@@ -369,4 +370,8 @@ class Model():
                 }
 
                 # save the data as json in output file
-                json.dump(data,file)
+                output.append(data)
+
+            ## save output in output file
+            j = json.dumps(output,indent=4)
+            file.write(j)
