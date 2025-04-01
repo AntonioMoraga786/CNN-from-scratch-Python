@@ -245,6 +245,10 @@ class CategoricalCrossentropy():
             if y[I] == 1:
                 self.dLdI[I] = -1/self.input[I]
 
+class mBGD():
+    def __init__(self):
+        self.model = []
+
 class Model():
     def __init__(self):
         # set default parameters
@@ -294,6 +298,8 @@ class Model():
         # initialize the other layers
         for l in range(len(self.model)-1):
             self.model[l+1].init(self.model[l].outputD)# initialize each layer with the output from last
+
+        # initialize
 
         ## start training the model
         for epoch in range(self.epoch):# loop for the desired number of epochs
@@ -375,3 +381,43 @@ class Model():
             ## save output in output file
             j = json.dumps(output,indent=4)
             file.write(j)
+
+    def load(self,name):
+        ## load a model from a json file
+        with open(f"./{name}.json","r") as file:
+            data = json.load(file)# load all json data into 
+
+        ## get model specific data
+        model = data[0]
+
+        # set constant values
+        self.lr = model["lr"]
+        self.minibatch = model["minibatch"]
+        self.inputD = model["inputD"]
+        self.epoch = model["epoch"]
+
+        ## set optimizer and loss functions
+        
+        # set optimizer
+        optimizers = [mBGD()]
+        self.optimizer = optimizers[model["optimizer"]]# get the optimizer from the list of optimizers
+
+        # set loss function
+        loss = [CategoricalCrossentropy()]
+        self.loss = loss[model["loss"]]
+
+        ## add each layer
+        for layer in data[1:]:
+            layers = [Conv(layer["kD"],layer["neuron"],layer["inputD"]), 
+                      dense(layer["neuron"],layer["inputD"]), 
+                      ReLU(layer["inputD"]), 
+                      Softmax(layer["inputD"])]
+            
+            self.Add(layers[layer["id"]])# add layer into the model
+            
+            # update model parameters
+            self.model[-1].kernel = layers["kernel"]
+            self.model[-1].bias = layers["bias"]
+
+            # layer added and updated, continue to add next layer
+            
