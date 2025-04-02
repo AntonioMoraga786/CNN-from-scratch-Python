@@ -9,6 +9,7 @@ class Conv():
         # function to intialize all the paramers of the layers
         # kD is a variablel with the dimensions of the kernel [x,y,z]
         self.n = n# number of neurons
+        self.type = 0# id in the layer list (Conv layer Id)
         self.inputD = I# input image dimensions [x,y,z]
         self.outputD = [1+self.inputD[0]-self.k[0],1+self.inputD[1]-self.k[1],self.n]
         
@@ -396,7 +397,7 @@ class Model():
                     "inputD": layer.inputD,#layer input dimension
                     "outputD": layer.outputD,#layer output dimension
                     "neuron": layer.n,# number of neurons
-                    "kD": layer.kD# kernel dimensions (only valid for conv layers)
+                    "k": layer.k# kernel dimensions (only valid for conv layers)
                 }
 
                 # save the data as json in output file
@@ -432,7 +433,7 @@ class Model():
 
         ## add each layer
         for layer in data[1:]:
-            layers = [Conv(layer["kD"],layer["neuron"],layer["inputD"]), 
+            layers = [Conv(layer["k"],layer["neuron"],layer["inputD"]), 
                       dense(layer["neuron"],layer["inputD"]), 
                       ReLU(layer["inputD"]), 
                       Softmax(layer["inputD"])]
