@@ -9,8 +9,8 @@ class Conv():
         # function to intialize all the paramers of the layers
         # kD is a variablel with the dimensions of the kernel [x,y,z]
         self.n = n# number of neurons
-        self.im = I# input image dimensions [x,y,z]
-        self.outputD = [1+self.im[0]-self.k[0],1+self.im[1]-self.k[1],self.n]
+        self.inputD = I# input image dimensions [x,y,z]
+        self.outputD = [1+self.inputD[0]-self.k[0],1+self.inputD[1]-self.k[1],self.n]
         
         self.bias = [2*random.random()-1 for i in range(n)]
 
@@ -110,7 +110,6 @@ class Conv():
 
         return [bias,weights]
     
-
 
 
 class dense():
