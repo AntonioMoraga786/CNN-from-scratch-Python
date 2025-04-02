@@ -89,6 +89,22 @@ class Conv():
                                 self.dLdI[kz][y+ky][x+kx] += self.kernel[z][kz][ky][kx]*dLdO[z][y][x]
                                 self.dLdW[z][kz][ky][kx] += self.input[kz][y+ky][x+kx]*dLdO[z][y][x]
 
+    def Der(self):
+        ## return a list with list with
+        ## bias derivatives but full of 0s
+        ## and the same for weights
+
+        ## generate bias der
+        bias = [0 for i in range(self.n)]
+
+        ## generate weights der
+        weights = [[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])]
+
+        return [bias,weights]
+    
+
+
+
 class dense():
     def __init__(self,n,I):
         self.type = 0
@@ -319,8 +335,9 @@ class Model():
                 
                 # loop through every layer
                 for model in self.model:
-                    shared[0].append(model.biasDer())# add empty bias derivative for layer
-                    shared[1].append(model.WeightDer())# add empty weights derivative for layer
+                    ders = model.Der()# get the 0 tensor for [bias,weights]
+                    shared[0].append(ders[0])# add empty bias derivative for layer
+                    shared[1].append(ders[1])# add empty weights derivative for layer
 
                 shared = Manager().list(shared)# turn list into a shared list for pool
 
@@ -416,8 +433,7 @@ class Model():
             self.Add(layers[layer["id"]])# add layer into the model
             
             # update model parameters
-            self.model[-1].kernel = layers["kernel"]
-            self.model[-1].bias = layers["bias"]
+            self.model[-1].kernel = layers["kernel"]# set model.kernel equal to saved value for kernel
+            self.model[-1].bias = layers["bias"]# same for bias
 
             # layer added and updated, continue to add next layer
-            
