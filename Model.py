@@ -113,6 +113,7 @@ class Conv():
 class dense():
     def __init__(self,n):
         self.n = n
+        self.k = False
 
     def init(self,inputD):
         self.type = 1
@@ -177,6 +178,10 @@ class dense():
 class ReLU():
     def __init__(self):
         self.type = 2# index for ReLU function
+        self.kernel = False
+        self.bias = False
+        self.n = False
+        self.k = False
 
     def init(self,inputD):
         self.outputD = inputD# calculate the output dimensions
@@ -232,7 +237,11 @@ class ReLU():
 class Softmax():
     def init(self):
         self.type = 3# index for SoftMax function
-        
+        self.kernel = False
+        self.bias = False
+        self.n = False
+        self.k = False
+
     def init(self,inputD):
         self.inputD = inputD
         self.outputD = inputD
