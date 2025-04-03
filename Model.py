@@ -118,13 +118,13 @@ class dense():
         self.type = 1
         self.k = False
         self.inputD = inputD# input dimension (a singular integer value)
-        self.bias = [2*random.random()-1 for i in range(n)]
+        self.bias = [2*random.random()-1 for i in range(self.n)]
         self.outputD = self.n
 
         self.kernel = []
         # loop though every neuron and generate its kernel values
-        for neuron in range(n):
-            weights = [2*random.random()-1 for i in range(I)]
+        for neuron in range(self.n):
+            weights = [2*random.random()-1 for i in range(self.inputD)]
 
             self.kernel.append(weights)
 
