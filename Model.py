@@ -175,8 +175,12 @@ class dense():
         return [bias,weights]
 
 class ReLU():
-    def __init__(self,inputD):
+    def __init__(self):
+        self.type = 2# index for ReLU function
+
+    def init(self,inputD):
         self.outputD = inputD# calculate the output dimensions
+        self.inputD = inputD
 
     def Pass(self,input):
         self.input = input# store the input values
@@ -201,7 +205,7 @@ class ReLU():
 
             return out
         
-    def Back(self,dLdO):
+    def Back(self,dLdO,shared,batch,pos):
         self.dLdI = []# initialize dL/dI
 
         # loop though every item in the output and calculate derivative
@@ -220,6 +224,10 @@ class ReLU():
         else:
             out = [self.Brecursion(item,d) for item,d in zip(outv,der)]
             return out
+        
+    def Der(self):
+        # no dLdO or dLdW so return false for both
+        return [[False],[False]]
     
 class Softmax():
     def __init__(self,inputD):
