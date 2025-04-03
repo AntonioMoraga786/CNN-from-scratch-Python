@@ -109,8 +109,6 @@ class Conv():
         weights = [[[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])] for i in range(self.n)]
 
         return [bias,weights]
-    
-
 
 class dense():
     def __init__(self,n,I):
@@ -143,7 +141,6 @@ class dense():
 
             self.output.append(output)# append the calculated value into the list of outputs
 
-
     def Back(self,dLdO):
         ## calculate dL/dB
         self.dLdB = dLdO# since each bias is used in one output and the derivative is equal to 1
@@ -169,6 +166,13 @@ class dense():
                 dldw.append(self.input[i]*dLdO[n])
 
             self.dLdW.append(dldw)
+
+    def Der(self):
+        ## add the der function for the dense layer
+        bias = [0 for i in range(self.n)]
+        weights = [[0 for i in range(self.inputD)] for i in range(self.n)]
+
+        return [bias,weights]
 
 class ReLU():
     def __init__(self,inputD):
