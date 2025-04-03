@@ -111,13 +111,15 @@ class Conv():
         return [bias,weights]
 
 class dense():
-    def __init__(self,n,I):
-        self.type = 0
-        self.kD = False
-        self.inputD = I# input dimension (a singular integer value)
-        self.bias = [2*random.random()-1 for i in range(n)]
-        self.outputD = n
+    def __init__(self,n):
         self.n = n
+
+    def init(self,inputD):
+        self.type = 1
+        self.k = False
+        self.inputD = inputD# input dimension (a singular integer value)
+        self.bias = [2*random.random()-1 for i in range(n)]
+        self.outputD = self.n
 
         self.kernel = []
         # loop though every neuron and generate its kernel values
