@@ -141,9 +141,12 @@ class dense():
 
             self.output.append(output)# append the calculated value into the list of outputs
 
-    def Back(self,dLdO):
+    def Back(self,dLdO,shared,batch,pos):
         ## calculate dL/dB
-        self.dLdB = dLdO# since each bias is used in one output and the derivative is equal to 1
+        n = 0
+        for dLdB in dLdO:
+            shared[0][pos][n] += dLdB/batch
+            n+= 1
 
         ## calculate dL/dI
         self.dLdI = []
@@ -157,15 +160,10 @@ class dense():
             self.dLdI.append(dldi)
 
         ## calculate dLdW
-        self.dLdW = []
 
         for n in range(self.outputD):# for every neuron in the layer
-            dldw = []# buffer for the derivatives of the weights
-
             for i in range(self.inputD):# for every weight/input in each neuron
-                dldw.append(self.input[i]*dLdO[n])
-
-            self.dLdW.append(dldw)
+                shared[1][pos][n][i] += self.input[i]*dLdO[n]/batch
 
     def Der(self):
         ## add the der function for the dense layer
