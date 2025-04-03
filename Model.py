@@ -227,10 +227,13 @@ class ReLU():
         
     def Der(self):
         # no dLdO or dLdW so return false for both
-        return [[False],[False]]
+        return [False,False]
     
 class Softmax():
-    def __init__(self,inputD):
+    def init(self):
+        self.type = 3# index for SoftMax function
+        
+    def init(self,inputD):
         self.inputD = inputD
         self.outputD = inputD
 
@@ -252,7 +255,7 @@ class Softmax():
         for I in self.input:
             self.output.append((e**I)/self.sum)# calculate the output value
                     
-    def Back(self,dLdO):
+    def Back(self,dLdO,shared,batch,pos):
         self.dLdI = [dLdO[i]*self.output[i]*(1-self.output[i]) for i in range(self.outputD)]
         
         ## calculte dLdI for i != j
@@ -261,6 +264,9 @@ class Softmax():
                 if i != j:
                     ## dOj/dIi x dL/dOj = dL/dIi
                     self.dLdI[i] -= (self.output[i]*self.output[j])*dLdO[j]
+
+    def Der(self):
+        return [False,False]
 
 class CategoricalCrossentropy():
     def __init__(self,inputD):
