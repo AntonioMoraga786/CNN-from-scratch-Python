@@ -5,18 +5,22 @@ import json
 from multiprocessing import Manager,Pool
 
 class Conv():
-    def __init__(self,kD,n,I):
+    def __init__(self,kD,n):
+        self.n = n# number of neurons
+        self.k = kD# save the kernel dimensions
+        self.type = 0# id in the layer list (Conv layer Id)
+
+    def init(self,inputD):
         # function to intialize all the paramers of the layers
         # kD is a variablel with the dimensions of the kernel [x,y,z]
-        self.n = n# number of neurons
-        self.type = 0# id in the layer list (Conv layer Id)
-        self.inputD = I# input image dimensions [x,y,z]
+
+        self.inputD = inputD# input image dimensions [x,y,z]
         self.outputD = [1+self.inputD[0]-self.k[0],1+self.inputD[1]-self.k[1],self.n]
         
-        self.bias = [2*random.random()-1 for i in range(n)]
+        self.bias = [2*random.random()-1 for i in range(self.n)]
 
         ## initialize the weights
-        self.k = kD# save the kernel dimensions
+        
         self.kernel = []# initialize the kernel weights list
 
         # loop though every neuron
@@ -78,7 +82,7 @@ class Conv():
             n += 1
 
         ## v2
-        self.dLdI = [[[0 for i in range(self.im[0])] for i in range(self.im[1])] for i in range(self.im[2])]
+        self.dLdI = [[[0 for i in range(self.inputD[0])] for i in range(self.inputD[1])] for i in range(self.inputD[2])]
         
         # loop though all the output values
         for z in range(self.outputD[2]):# for every neuron
@@ -102,7 +106,7 @@ class Conv():
         bias = [0 for i in range(self.n)]
 
         ## generate weights der
-        weights = [[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])]
+        weights = [[[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])] for i in range(self.n)]
 
         return [bias,weights]
     
