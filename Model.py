@@ -63,7 +63,6 @@ class Conv():
 
     def Back(self,dLdO,shared,batch,pos):# perform back propagation
         ## initialize derivative lists
-        self.dLdB = []#dL/dB
 
         ## calculate dL/dB:
 
@@ -74,15 +73,12 @@ class Conv():
             for row in kernel:# for the row in each plane
                 dLdB += sum(row)# add the sum of all the values in the row
 
-            self.dLdB.append(dLdB)# add value into bias derivatives
-
             # add values to shared list
             shared[0][pos][n] += dLdB/batch
             n += 1
 
         ## v2
         self.dLdI = [[[0 for i in range(self.im[0])] for i in range(self.im[1])] for i in range(self.im[2])]
-        self.dLdW = [[[[0 for i in range(self.k[0])] for i in range(self.k[1])] for i in range(self.k[2])] for i in range(self.n)]
         
         # loop though all the output values
         for z in range(self.outputD[2]):# for every neuron
@@ -95,7 +91,6 @@ class Conv():
                                 self.dLdI[kz][y+ky][x+kx] += self.kernel[z][kz][ky][kx]*dLdO[z][y][x]
 
                                 val = self.input[kz][y+ky][x+kx]*dLdO[z][y][x]
-                                self.dLdW[z][kz][ky][kx] += val# add value to derivatives list
                                 shared[1][pos][z][kz][ky][kx] += val/batch# add value to shared derivatives list
 
     def Der(self):
