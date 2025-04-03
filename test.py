@@ -1,6 +1,6 @@
 import time
 ## test the convolutional layer
-"""
+
 from Model import Conv
 
 # define the input image
@@ -21,9 +21,15 @@ dLs = [[[1,1],
 
 # initialize the kernel as a 2x2x2 shape and make a forward pass
 t1 = time.time()
-conv = Conv([3,3,3],2)
+conv = Conv([2,2,3],2)
+conv.init([3,3,3])
 conv.Pass(image)
-conv.Back(dLs)
+r = conv.Der()
+l = [[r[0]],[r[1]]]
+print(l)
+conv.Back(dLs,l,1,0)
+
+print(l)
 
 # print the outputs
 print("kernel")
@@ -58,22 +64,22 @@ print("")
 print("dL/dW")
 
 i = 0
-for neuron in conv.dLdW:
+for neuron in l[1][0]:
     print(f"Neuron {i}")
     print("")
     i += 1
 
     for plane in neuron:
         print("")
-        for row in neuron:
+        for row in plane:
             print(*row)
 
 print("")
 print("dL/dB")
 
-print(*conv.dLdB)
+print(*l[0][0])
 
-"""
+
 ## test the dense layer
 """"
 from Model import dense
@@ -206,7 +212,7 @@ print(*loss.dLdI)
 ## test Model class
 
 from Model import Model,dense,CategoricalCrossentropy
-
+"""
 model = Model()
 model.Add(dense(10,10))
 model.Add(dense(10,10))
@@ -216,3 +222,14 @@ model.loss = CategoricalCrossentropy(10)
 model.optimizer = CategoricalCrossentropy(10)
 
 model.save("file")
+"""
+"""
+import json
+
+with open("./file.json","r") as file:
+    jobj = json.load(file)
+
+dic = jobj[0]
+print(dic)
+print(type(dic))
+"""
