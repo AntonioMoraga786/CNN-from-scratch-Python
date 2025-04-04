@@ -298,6 +298,43 @@ class CategoricalCrossentropy():
 class mBGD():
     def __init__(self):
         self.model = []
+        self.lr = 1.0# set learning rate
+        self.Ds = []# list with all the derivatives
+        self.M = []# list with all the derivatives from last pass
+        self.mom = False# momentum toggle
+        self.type = 0# set optimizer ID
+        
+    def Pass(self):
+        ## perform a update on the model
+        n = len(self.model)# get numebr of layers
+        
+        for i in range(n):
+            if self.Ds[0][i]:# if there are parameters to update
+                ## update the bias
+                for b in range(len(self.Ds[0][i])):
+                    d = 0# delta of bias value
+
+                    if self.mom:# if we use momentum
+                        pass## will add later
+
+                    d -= self.lr*self.Ds[0][i][b]
+
+                    self.model[i].bias[b] += d# update model bias
+
+                ## update weights
+                Uweights = []# updated weights
+
+                for neuron,der in zip(self.model[i].kernel,self.Ds[1][i]):
+                    # for every neuron weights and derivatives
+
+                    if type(neuron) == list:# check idf the kernel is multidimensional
+                        Uweights.append(self.recursion(neuron,der))
+
+                    else:
+                        # add the new updated weight
+                        Uweights.append(neuron-der*self.lr)
+
+                self.model[i].kernel = Uweights# update the kernel of the layer
 
 class Model():
     def __init__(self):
