@@ -336,6 +336,18 @@ class mBGD():
 
                 self.model[i].kernel = Uweights# update the kernel of the layer
 
+    def recursion(self,weights,derivatives):
+        buffer = []# buffer for the new weights
+
+        for W,D in zip(weights,derivatives):
+            if type(W) == list:# if there is even more items inside W
+                buffer.append(self.recursion(W,D))
+
+            else:
+                buffer.append(W-self.lr*D)#Update weight
+
+        return buffer
+
 class Model():
     def __init__(self):
         # set default parameters
