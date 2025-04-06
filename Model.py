@@ -2,7 +2,8 @@ import random
 import time
 from math import log
 import json
-from multiprocessing import Manager,Pool
+import pickle
+from matplotlib import pyplot as plt
 
 class Conv():
     def __init__(self,kD,n):
@@ -144,11 +145,11 @@ class dense():
 
             self.output.append(output)# append the calculated value into the list of outputs
 
-    def Back(self,dLdO,shared,batch,pos):
+    def Back(self,dLdO,Ders,batch,pos):
         ## calculate dL/dB
         n = 0
         for dLdB in dLdO:
-            shared[0][pos][n] += dLdB/batch
+            Ders[0][pos][n] += dLdB/batch
             n+= 1
 
         ## calculate dL/dI
@@ -166,11 +167,11 @@ class dense():
 
         for n in range(self.outputD):# for every neuron in the layer
             for i in range(self.inputD):# for every weight/input in each neuron
-                shared[1][pos][n][i] += self.input[i]*dLdO[n]/batch
+                Ders[1][pos][n][i] += self.input[i]*dLdO[n]/batch
 
     def Der(self):
         ## add the der function for the dense layer
-        bias = [0 for i in range(self.n)]
+        bias = [0.0 for i in range(self.n)]
         weights = [[0 for i in range(self.inputD)] for i in range(self.n)]
 
         return [bias,weights]
@@ -232,7 +233,7 @@ class ReLU():
         
     def Der(self):
         # no dLdO or dLdW so return false for both
-        return [False,False]
+        return [[False],[False]]
     
 class Softmax():
     def init(self):
@@ -275,7 +276,7 @@ class Softmax():
                     self.dLdI[i] -= (self.output[i]*self.output[j])*dLdO[j]
 
     def Der(self):
-        return [False,False]
+        return [[False],[False]]
 
 class CategoricalCrossentropy():
     def __init__(self,inputD):
@@ -285,6 +286,7 @@ class CategoricalCrossentropy():
 
     def Pass(self,input,y):
         self.input = input
+        self.loss = 0
         self.dLdI = []
         self.y = y# store the categories as well
 
@@ -309,7 +311,7 @@ class mBGD():
         n = len(self.model)# get numebr of layers
         
         for i in range(n):
-            if self.Ds[0][i]:# if there are parameters to update
+            if self.Ds[0][i][0]:# if there are parameters to update
                 ## update the bias
                 for b in range(len(self.Ds[0][i])):
                     d = 0# delta of bias value
@@ -353,16 +355,18 @@ class Model():
         # set default parameters
         self.lr = 1# set default learning Rate
         self.optimizer = False# store the optimizer object here
+        self.processes = 1# number of processe
         self.loss = False# store the loss object here
         self.model = []# store the layer objects here
-        self.minibatch = 1# mini-batch size (number of processes as well)
+        self.minibatch = 1# mini-batch size
         self.inputD = False# store the input dimensions for the model
         self.epoch = 100# default epoch number
+        self.decay = 0.01*self.lr
 
     def Add(self,layer):
         self.model.append(layer)
 
-    def Pass(self,Input,Class,derivatives):
+    def Pass(self,Input,Class,Ders):
         ## function to perform a full Pass (forward and back) over the model with a specific input data
         ## model is already initialized
         ## function should add derivatives from this input into derivatives list
@@ -377,7 +381,7 @@ class Model():
             self.model[i+1].Pass(self.model[i].output)# pass the output from last function as input
 
         ## perform a Pass on the loss function
-        self.loss.Pass(self.model[-1].output)
+        self.loss.Pass(self.model[-1].output,Class)
 
         ## perform the backward Passes
         dLdO = self.loss.dLdI# get initial derivative
@@ -385,65 +389,117 @@ class Model():
 
         for i in range(n):
             # send, for backpropagation, dLdO, shared list, minibatch size, and layer in list
-            self.model[n-i-1].Back(dLdO,derivatives,self.minibatch,n-i-1)# perform a backward Pass for every layer in the model
+            self.model[n-i-1].Back(dLdO,Ders,self.minibatch,n-i-1)# perform a backward Pass for every layer in the model
             dLdO = self.model[n-i-1].dLdI# get the dL/dI of the layer
 
         ## all the derivatives have been added into the shared list
 
     def Train(self,data,categories):
+        self.Hloss = []# historic loss
+        self.Hacc = []# historic accuracy
+        self.Ha = []# axis for historical data
+
+        #pool = Pool(processes=self.minibatch)
         ## initialize the model layers
-        self.model[-1].init(self.inputD)# init initial layer
+        self.model[0].init(self.inputD)# init initial layer
         
         # initialize the other layers
         for l in range(len(self.model)-1):
             self.model[l+1].init(self.model[l].outputD)# initialize each layer with the output from last
 
-        # initialize
+        datao = data# save data to set it in the next epoch
+        categorieso = categories
 
         ## start training the model
         for epoch in range(self.epoch):# loop for the desired number of epochs
+            print("")
+            print("")
+            print("Epoch No. ",epoch)
+            print("")
+
+            self.optimizer.lr = self.lr - self.decay*epoch
+            
+            data = datao
+            categories = categorieso
             self.batches = len(data)//self.minibatch# get the number of minibatches in the whole dataset
 
-            for n in range(self.batches):
-                # get the data for this batch
-                self.batch = data[:self.minibatch]
-                data = data[self.minibatch:]
+            self.batch = []
+            self.Cat = []
 
-                self.Cat = categories[:self.minibatch]
-                categories = categories[self.minibatch:]
+            for n in range(self.batches):
+                batch = []
+                CATEGORY = []
+
+                for m in range(self.minibatch):
+                    # get the data for this batch
+                    batch.append(data[0])
+                    data = data[1:]
+
+                    CATEGORY.append(categories[0])
+                    categories = categories[1:]
 
                 # create shared list to store the deriatives
                 # empty list with two sub lists, one for bias derivatives, other for weight
+                #shared = [M.list(),M.list()]
                 shared = [[],[]]
-                
+                    
                 # loop through every layer
                 for model in self.model:
                     ders = model.Der()# get the 0 tensor for [bias,weights]
                     shared[0].append(ders[0])# add empty bias derivative for layer
                     shared[1].append(ders[1])# add empty weights derivative for layer
 
-                shared = Manager().list(shared)# turn list into a shared list for pool
+                self.Ders = shared# turn list into a shared list for pool
 
                 # create a new process for each input in minibatch
-                with Pool(processes=self.minibatch) as pool:# create self.minibatch processes
-                    pool.starmap(self.Pass,[(In,Cat,shared) for In,Cat in zip(self.batch,self.Cat)])
+                #with Pool(processes=self.minibatch) as pool:# create self.minibatch processes
 
+                for In,Cat in zip(batch,CATEGORY):
+                    self.Pass(In,Cat,self.Ders)
+                                    
                 # pass the value into the optimizer and update model
                 self.optimizer.model = self.model# update the optimizer model and prepare for updating
-                self.optimizer.Pass(shared)# pass the derivatives to the optimizer
+                self.optimizer.Ds = self.Ders
+                self.optimizer.Pass()# pass the derivatives to the optimizer
                 self.model = self.optimizer.model# update the global model
 
-    def predict(self,In):
+            ## test the new model
+            self.perf = [0,0]# list to store the number of samples,correct samples,loss
+
+            for In,Cat in zip(datao,categorieso):
+                self.predict(In,Cat)
+
+            s = len(datao)
+
+            print(f"Accuracy = {self.perf[0]*100/s}%")
+            print(f"loss = {self.perf[1]/s}")
+            self.Hloss.append(self.perf[1]/s)
+            self.Hacc.append(self.perf[0]*100/s)
+            self.Ha.append(epoch)
+
+        plt.plot(self.Ha,self.Hloss)
+        plt.show()
+        
+        plt.plot(self.Ha,self.Hacc)
+        plt.show()
+
+    def predict(self,In,c):
         self.model[0].Pass(In)# feed input values to the input layeer
 
         for i in range(len(self.model)-1):# loop through all the other layers in the model
-            self.model[i+1].Pass(self.model[0].output)# feed output from last layer as inptu
+            self.model[i+1].Pass(self.model[i].output)# feed output from last layer as inptu
+
+        self.loss.Pass(self.model[-1].output,c)
 
         ## get the index of the maximum value of output
         prob = max(self.model[-1].output)# get the maximum output value
         pos = self.model[-1].output.index(prob)# get the index of the max value
+        
+        if c.index(1) == pos:
+            self.perf[0] += 1
 
-        return pos# return the index (categorical value)
+        self.perf[1] += self.loss.loss
+
     
     def save(self,name):
         ## function to save the model into a json format
