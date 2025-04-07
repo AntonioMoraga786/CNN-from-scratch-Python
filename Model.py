@@ -278,6 +278,23 @@ class Softmax():
     def Der(self):
         return [[False],[False]]
 
+class Flatten():
+    def init(self,inputD):
+        self.type = 2# index for ReLU function
+        self.kernel = False
+        self.bias = False
+        self.n = False
+        self.k = False
+
+        ## this layer is meant to dlatten the output from a Conv layer and make it 1D
+        self.inputD = inputD
+
+        ## calculate output dimensions
+        self.outputD = 1
+
+        for axis in inputD:
+            self.outputD = self.outputD*axis
+
 class CategoricalCrossentropy():
     def __init__(self,inputD):
         self.inputD = inputD
@@ -519,8 +536,7 @@ class Model():
             self.perf[0] += 1
 
         self.perf[1] += self.loss.loss
-
-    
+ 
     def save(self,name):
         ## function to save the model into a json format
         with open(f"./{name}.json","w") as file:
