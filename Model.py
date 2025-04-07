@@ -394,7 +394,7 @@ class Model():
 
         ## all the derivatives have been added into the shared list
 
-    def Train(self,data,categories):
+    def Train(self,TrainingData):
         self.Hloss = []# historic loss
         self.Hacc = []# historic accuracy
         self.Ha = []# axis for historical data
@@ -407,6 +407,15 @@ class Model():
         for l in range(len(self.model)-1):
             self.model[l+1].init(self.model[l].outputD)# initialize each layer with the output from last
 
+        random.shuffle(TrainingData)
+
+        data = []
+        categories = []
+
+        for item in TrainingData:
+            data.append(item[0])
+            categories.append(item[1])
+
         datao = data# save data to set it in the next epoch
         categorieso = categories
 
@@ -417,10 +426,21 @@ class Model():
             print("Epoch No. ",epoch)
             print("")
 
+            random.shuffle(TrainingData)
+
+            data = []
+            categories = []
+
+            for item in TrainingData:
+                data.append(item[0])
+                categories.append(item[1])
+
+            datao = data# save data to set it in the next epoch
+            categorieso = categories
+
+
             self.optimizer.lr = self.lr - self.decay*epoch
             
-            data = datao
-            categories = categorieso
             self.batches = len(data)//self.minibatch# get the number of minibatches in the whole dataset
 
             self.batch = []
